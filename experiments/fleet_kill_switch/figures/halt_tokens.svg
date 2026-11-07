@@ -1,0 +1,12 @@
+<svg class="chart" viewBox="0 0 900 158" role="img" aria-label="Output tokens, 1,000 agents, simulated model">
+<text x="0" y="16" class="ct">Output tokens, 1,000 agents, simulated model</text>
+<text x="240" y="52" text-anchor="end" class="cl">no stop (runs to completion)</text>
+<rect x="250" y="34" width="360.0" height="26" rx="4" fill="var(--off)"/>
+<text x="618.0" y="52" class="cv">256,000 output tokens</text>
+<text x="240" y="90" text-anchor="end" class="cl">L4 at 25% of the run</text>
+<rect x="250" y="72" width="85.9" height="26" rx="4" fill="var(--on)"/>
+<text x="343.9" y="90" class="cv">61,069 output tokens · saved 76%</text>
+<text x="240" y="128" text-anchor="end" class="cl">…of which after the stop</text>
+<rect x="250" y="110" width="2.0" height="26" rx="4" fill="var(--warn)"/>
+<text x="260.0" y="128" class="cv">729 output tokens · in-flight decode tails</text>
+</svg>

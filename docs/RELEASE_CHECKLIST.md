@@ -1,45 +1,36 @@
 # AxLab public release checklist
 
-## Release gate: prepare a clean extraction
+The upstream `Orivael-Dev/axiom` repository is private. Don't switch its
+visibility. AxLab is built from copied files only (see [PROVENANCE.md](PROVENANCE.md)).
 
-The upstream `Orivael-Dev/axiom` repository is private. Do not simply switch its visibility to public.
+## Done (2026-11-07)
 
-- [ ] Create a new `Orivael-Dev/axlab` public repo (or initially private while preparing).
-- [ ] Record exact AXIOM source commit to export.
-- [ ] Export only necessary files for Slim Fabric: `research/simulation/slim_fabric_bench.py`, audited dependencies under `axiom_agent_fabric/` and `axiom_event_token/`, plus dedicated tests.
-- [ ] Audit imports for references to internal control-plane, credentials, business customer data, deployment addresses, or private datasets.
-- [ ] Include the actual `axiom_fleet_level.py` and relevant governance tests **only if** you choose to release those implementations and their dependency chains.
-- [ ] Check all file histories and git-lfs/assets for secrets and sensitive artifacts. Create the repository from clean copied files, **not** a fork retaining private history.
-- [ ] Select license after verifying dependencies and rights (Apache-2.0 or MIT are candidates; not automatically chosen).
-- [ ] Pin Python dependencies and optional Ollama model/version; use a lockfile or exact versions.
-- [ ] Add `pytest`, linting, and cross-platform CI. Note known platform-dependent flaky suspend test rather than hiding it.
-- [ ] Verify default run makes **no network calls or paid model requests**.
-- [ ] Test on a clean machine with no local AXIOM installation or inherited `PYTHONPATH`.
-- [ ] Re-run 1k and 10k scripted runs, test L3/L4 behavior, and check event accounting.
-- [ ] Attach raw reference JSON and an experiment manifest for the original 75k Jetson run.
-- [ ] If publishing an Android APK, include artifact hash, app permissions, build instructions, dependencies, source code and model-license review. Do not assume the APK supports 75k agents.
-- [ ] Tag `v0.1.0` only after independent reproducibility is confirmed.
+- [x] Create the public `Orivael-Dev/axlab` repository from clean copied files, with no history from the private repo.
+- [x] Record the exact AXIOM source commit: `2b82899f` ([PROVENANCE.md](PROVENANCE.md)).
+- [x] Export the Slim Fabric benchmark and the audited subset it needs (`axlab/fabric/`, `axlab/signing.py`), with tests.
+- [x] Export the fleet kill switch (`axlab/governance/fleet_level.py`) and its switch and fabric tests.
+- [x] Audit every exported file for credentials, customer data, deployment addresses and private datasets. None found.
+- [x] Select a license: PolyForm Noncommercial 1.0.0, with commercial licensing on request.
+- [x] Pin dependencies (`requirements-lock.txt`); declare ranges in `pyproject.toml`.
+- [x] Add `pytest` and cross-platform CI (Linux, macOS, Windows × Python 3.11–3.13).
+- [x] Default runs make no network calls and no paid model requests (Ollama is opt-in and local).
+- [x] Tests pass in a fresh virtualenv with no AXIOM install, no inherited `PYTHONPATH`, and no master key.
+- [x] The 1k scripted run completes from the clean environment.
 
-## Suggested repo layout when real source is added
+## Still open
 
-```text
-axlab/
-├── README.md
-├── LICENSE
-├── pyproject.toml
-├── axlab/                      # independently importable public packages
-│   ├── fabric/                 # audited slim Fabric subset
-│   └── governance/             # audited L3/L4 subset, if approved
-├── experiments/
-│   ├── fabric_density/         # 1k / 10k / 75k presets
-│   ├── fleet_governance/       # suspend, resume, terminate, stale events
-│   └── pocket_android/         # Android APK runner source / scripts
-├── results/                    # raw JSON + host manifests
-├── tests/
-├── docs/
-└── .github/ISSUE_TEMPLATE/
-```
+- [ ] Re-run 10k and 75k scripted runs on the Jetson from this repo; commit the raw JSON and a host manifest under `experiments/slim_fabric/results/`.
+- [ ] Attach raw reference JSON and an experiment manifest for the original 75k Jetson run (only a summary exists today).
+- [ ] L3/L4 on the Jetson from this repo: transcripts retained/cleared, inbox accounting, RSS before/after.
+- [ ] Add a suspended-while-waiting-on-a-tool L3 test.
+- [ ] `runnode`: export the AXIOM loop runner (`axiom_loops`) after its own audit, or keep it out and say so (currently out).
+- [ ] Watch CI for the timing-sensitive tests (`test_level_check_is_cheap`, the fabric suspend test). On shared runners, mark them flaky in the open rather than deleting them.
+- [ ] Android APK: if you publish it, include the artifact hash, app permissions, build instructions, dependencies, source code and a model-license review. Don't assume the APK supports 75k agents.
+- [ ] Tag `v0.1.0` only after someone outside Orivael reproduces a run.
 
 ## First public milestone
 
-A reader who has only Python 3.11+ should be able to clone, install, and complete a **1,000-agent scripted run**, including reproducible measurements, without any model download, API key, or paid service. Then they can scale to 10k/75k and optionally add Ollama.
+A reader with only Python 3.11+ can clone, install, and complete a
+**1,000-agent scripted run**, including reproducible measurements, with no
+model download, API key or paid service. Then they can scale to 10k/75k and
+optionally add Ollama. *(Met on Windows; CI checks Linux and macOS.)*

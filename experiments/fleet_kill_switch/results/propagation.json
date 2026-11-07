@@ -1,0 +1,82 @@
+{
+ "experiment": "propagation",
+ "host": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+  "cores": 12,
+  "ram_gb": 17.0,
+  "python": "3.13.7",
+  "gpu": "NVIDIA GeForce GTX 1660 Ti, 6144 MiB",
+  "at": "2026-11-06T22:33:19Z"
+ },
+ "quick": false,
+ "trials": 200,
+ "results": {
+  "poll_10ms": {
+   "raise_to_seen_ms": {
+    "n": 200,
+    "mean": 17.32,
+    "sd": 6.3,
+    "p50": 16.01,
+    "p95": 33.04,
+    "p99": 36.65,
+    "max": 37.95,
+    "min": 9.45
+   },
+   "raise_write_ms": {
+    "n": 200,
+    "mean": 17.98,
+    "sd": 6.91,
+    "p50": 16.49,
+    "p95": 34.17,
+    "p99": 42.79,
+    "max": 47.47,
+    "min": 10.87
+   }
+  },
+  "poll_50ms": {
+   "raise_to_seen_ms": {
+    "n": 200,
+    "mean": 44.29,
+    "sd": 15.49,
+    "p50": 42.88,
+    "p95": 69.2,
+    "p99": 75.51,
+    "max": 79.17,
+    "min": 11.45
+   },
+   "raise_write_ms": {
+    "n": 200,
+    "mean": 40.41,
+    "sd": 17.88,
+    "p50": 38.78,
+    "p95": 68.99,
+    "p99": 75.12,
+    "max": 79.15,
+    "min": 11.72
+   }
+  },
+  "poll_100ms": {
+   "raise_to_seen_ms": {
+    "n": 200,
+    "mean": 62.86,
+    "sd": 25.09,
+    "p50": 64.52,
+    "p95": 102.08,
+    "p99": 107.03,
+    "max": 116.45,
+    "min": 11.33
+   },
+   "raise_write_ms": {
+    "n": 200,
+    "mean": 38.46,
+    "sd": 20.36,
+    "p50": 29.82,
+    "p95": 69.62,
+    "p99": 87.5,
+    "max": 115.13,
+    "min": 12.38
+   }
+  }
+ }
+}

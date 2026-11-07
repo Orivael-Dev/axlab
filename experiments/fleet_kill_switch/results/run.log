@@ -1,0 +1,81 @@
+== footprint
+  import 29.42 ms, switch object 2220 B, file 404 B, third-party deps none
+[footprint] -> experiments/fleet_kill_switch/results/footprint.json
+== overhead
+  cached_absent_1scope           302.9 ns
+  cached_present_1scope          389.4 ns
+  cached_present_3scopes         546.1 ns
+  uncached_absent              48111.2 ns
+  uncached_present             63003.7 ns
+[overhead] -> experiments/fleet_kill_switch/results/overhead.json
+== propagation
+  poll   10 ms: seen p50   16.0  p99   36.7 ms; write p50  16.5 ms
+  poll   50 ms: seen p50   42.9  p99   75.5 ms; write p50  38.8 ms
+  poll  100 ms: seen p50   64.5  p99  107.0 ms; write p50  29.8 ms
+[propagation] -> experiments/fleet_kill_switch/results/propagation.json
+== throughput
+  rep 0 off            3260/s  fleet RSS  152.0 MB
+  rep 0 on_absent      3226/s  fleet RSS  153.7 MB
+  rep 0 on_l1          3207/s  fleet RSS  152.5 MB
+  rep 1 on_l1          3228/s  fleet RSS  151.8 MB
+  rep 1 on_absent      3211/s  fleet RSS  151.0 MB
+  rep 1 off            3260/s  fleet RSS  151.7 MB
+  rep 2 off            3308/s  fleet RSS  152.4 MB
+  rep 2 on_absent      3123/s  fleet RSS  152.2 MB
+  rep 2 on_l1          3207/s  fleet RSS  152.0 MB
+  rep 3 on_l1          3272/s  fleet RSS  152.5 MB
+  rep 3 on_absent      3295/s  fleet RSS  152.7 MB
+  rep 3 off            3321/s  fleet RSS  152.5 MB
+  rep 4 off            3210/s  fleet RSS  153.5 MB
+  rep 4 on_absent      2968/s  fleet RSS  152.7 MB
+  rep 4 on_l1          3123/s  fleet RSS  152.5 MB
+[throughput] -> experiments/fleet_kill_switch/results/throughput.json
+== halt
+  baseline: 2000 calls, 256000 out tokens, 69.4 s
+  L3 trial 0: halt  291.5 ms, started-after 0, in-flight 8, tokens after 893, resumed steps 2000
+  L3 trial 1: halt  325.5 ms, started-after 0, in-flight 8, tokens after 308, resumed steps 2000
+  L3 trial 2: halt  341.5 ms, started-after 4, in-flight 8, tokens after 1031, resumed steps 2000
+  L3 trial 3: halt  217.6 ms, started-after 0, in-flight 8, tokens after 584, resumed steps 2000
+  L3 trial 4: halt  247.9 ms, started-after 0, in-flight 8, tokens after 707, resumed steps 2000
+  L4 trial 0: halt  246.1 ms, started-after 0, in-flight 8, tokens after 761
+  L4 trial 1: halt  218.5 ms, started-after 0, in-flight 8, tokens after 665
+  L4 trial 2: halt  158.3 ms, started-after 0, in-flight 8, tokens after 422
+  L4 trial 3: halt  316.1 ms, started-after 4, in-flight 8, tokens after 1028
+  L4 trial 4: halt  196.3 ms, started-after 0, in-flight 8, tokens after 639
+  L4 trial 5: halt  147.0 ms, started-after 0, in-flight 8, tokens after 368
+  L4 trial 6: halt  328.5 ms, started-after 6, in-flight 8, tokens after 1060
+  L4 trial 7: halt  235.4 ms, started-after 0, in-flight 8, tokens after 740
+  L4 trial 8: halt  315.5 ms, started-after 2, in-flight 8, tokens after 1026
+  L4 trial 9: halt  347.1 ms, started-after 3, in-flight 8, tokens after 582
+[halt] -> experiments/fleet_kill_switch/results/halt.json
+== runnode
+  trial 0: raise -> run terminated   810.5 ms
+  trial 1: raise -> run terminated   620.8 ms
+  trial 2: raise -> run terminated   514.1 ms
+  trial 3: raise -> run terminated   654.4 ms
+  trial 4: raise -> run terminated   572.9 ms
+  trial 5: raise -> run terminated   664.0 ms
+  trial 6: raise -> run terminated   589.1 ms
+  trial 7: raise -> run terminated   554.3 ms
+  trial 8: raise -> run terminated   683.7 ms
+  trial 9: raise -> run terminated   642.6 ms
+  trial 10: raise -> run terminated   608.3 ms
+  trial 11: raise -> run terminated   583.5 ms
+  trial 12: raise -> run terminated   602.7 ms
+  trial 13: raise -> run terminated   684.4 ms
+  trial 14: raise -> run terminated   806.9 ms
+  trial 15: raise -> run terminated   644.5 ms
+  trial 16: raise -> run terminated   674.8 ms
+  trial 17: raise -> run terminated   748.7 ms
+  trial 18: raise -> run terminated   464.5 ms
+  trial 19: raise -> run terminated   641.8 ms
+[runnode] -> experiments/fleet_kill_switch/results/runnode.json
+== live
+  baseline: 2048 tokens in 24.6 s
+  drain trial 0: 23 tokens after the raise, halt 257.2 ms, next TTFT 46 ms
+  drain trial 1: 135 tokens after the raise, halt 1596.0 ms, next TTFT 47 ms
+  drain trial 2: 194 tokens after the raise, halt 2366.1 ms, next TTFT 74 ms
+  abort trial 0: 3 tokens after the raise, halt 37.5 ms, next TTFT 63 ms
+  abort trial 1: 4 tokens after the raise, halt 46.1 ms, next TTFT 63 ms
+  abort trial 2: 2 tokens after the raise, halt 24.3 ms, next TTFT 63 ms
+[live] -> experiments/fleet_kill_switch/results/live.json

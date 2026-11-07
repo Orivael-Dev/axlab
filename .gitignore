@@ -13,3 +13,7 @@ __pycache__/
 .nodexloop/
 results/local/
 !results/.gitkeep
+*.egg-info/
+build/
+dist/
+.axiom/

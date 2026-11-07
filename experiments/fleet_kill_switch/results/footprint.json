@@ -1,0 +1,67 @@
+{
+ "experiment": "footprint",
+ "host": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+  "cores": 12,
+  "ram_gb": 17.0,
+  "python": "3.13.7",
+  "gpu": "NVIDIA GeForce GTX 1660 Ti, 6144 MiB",
+  "at": "2026-11-06T22:31:37Z"
+ },
+ "quick": false,
+ "import_ms": {
+  "n": 10,
+  "mean": 31.68,
+  "sd": 3.8,
+  "p50": 29.42,
+  "p95": 41.0,
+  "p99": 41.0,
+  "max": 41.0,
+  "min": 28.79
+ },
+ "import_ms_under_tracemalloc": {
+  "n": 10,
+  "mean": 39.05,
+  "sd": 3.63,
+  "p50": 36.98,
+  "p95": 47.74,
+  "p99": 47.74,
+  "max": 47.74,
+  "min": 35.81
+ },
+ "import_heap_kb": {
+  "n": 10,
+  "mean": 703.9,
+  "sd": 0.1,
+  "p50": 703.9,
+  "p95": 704.0,
+  "p99": 704.0,
+  "max": 704.0,
+  "min": 703.7
+ },
+ "switch_object_heap_bytes": {
+  "n": 10,
+  "mean": 2268.0,
+  "sd": 82.0,
+  "p50": 2220,
+  "p95": 2379,
+  "p99": 2379,
+  "max": 2379,
+  "min": 2159
+ },
+ "rss_delta_kb": {
+  "n": 10,
+  "mean": 2578.0,
+  "sd": 172.0,
+  "p50": 2572.0,
+  "p95": 2804.0,
+  "p99": 2804.0,
+  "max": 2804.0,
+  "min": 2332.0
+ },
+ "third_party_modules": [],
+ "module_source_bytes": 17153,
+ "governance_file_bytes": 404,
+ "receipt_bytes_per_change": 205
+}

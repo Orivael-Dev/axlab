@@ -1,0 +1,81 @@
+{
+ "experiment": "overhead",
+ "host": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+  "cores": 12,
+  "ram_gb": 17.0,
+  "python": "3.13.7",
+  "gpu": "NVIDIA GeForce GTX 1660 Ti, 6144 MiB",
+  "at": "2026-11-06T22:32:02Z"
+ },
+ "quick": false,
+ "results": {
+  "cached_absent_1scope": {
+   "calls_per_rep": 1000000,
+   "ns_per_call": {
+    "n": 7,
+    "mean": 316.9,
+    "sd": 22.3,
+    "p50": 302.9,
+    "p95": 353.9,
+    "p99": 353.9,
+    "max": 353.9,
+    "min": 299.3
+   }
+  },
+  "cached_present_1scope": {
+   "calls_per_rep": 1000000,
+   "ns_per_call": {
+    "n": 7,
+    "mean": 391.8,
+    "sd": 17.7,
+    "p50": 389.4,
+    "p95": 426.5,
+    "p99": 426.5,
+    "max": 426.5,
+    "min": 374.8
+   }
+  },
+  "cached_present_3scopes": {
+   "calls_per_rep": 1000000,
+   "ns_per_call": {
+    "n": 7,
+    "mean": 558.3,
+    "sd": 43.9,
+    "p50": 546.1,
+    "p95": 651.9,
+    "p99": 651.9,
+    "max": 651.9,
+    "min": 516.7
+   }
+  },
+  "uncached_absent": {
+   "calls_per_rep": 20000,
+   "ns_per_call": {
+    "n": 7,
+    "mean": 47999.3,
+    "sd": 2398.7,
+    "p50": 48111.2,
+    "p95": 52514.8,
+    "p99": 52514.8,
+    "max": 52514.8,
+    "min": 45341.2
+   }
+  },
+  "uncached_present": {
+   "calls_per_rep": 20000,
+   "ns_per_call": {
+    "n": 7,
+    "mean": 64830.2,
+    "sd": 4152.9,
+    "p50": 63003.7,
+    "p95": 70628.6,
+    "p99": 70628.6,
+    "max": 70628.6,
+    "min": 60489.4
+   }
+  },
+  "python_noop_call_ns": 82.5
+ }
+}

@@ -1,0 +1,15 @@
+# Exact versions the test suite last passed with (Python 3.13, Windows 11).
+# pip install -r requirements-lock.txt && pip install -e . --no-deps
+certifi==2026.10.23
+charset-normalizer==3.5.2
+colorama==0.4.6 ; sys_platform == "win32"
+idna==3.20
+iniconfig==2.3.1
+numpy==2.5.4
+packaging==26.3
+pluggy==1.7.0
+psutil==7.2.2
+Pygments==2.21.0
+pytest==9.2.0
+requests==2.34.2
+urllib3==2.8.0

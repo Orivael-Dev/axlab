@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A kill switch for agents: 546 ns a check, up to 76% fewer tokens</title>
+<meta name="description" content="Orivael runtime governance: one file-based L1-L4 kill switch for every agent runtime. 546 ns per check, under 76 ms to reach another process, 3.3% fleet throughput at worst, and an L4 that saved 76% of a run's tokens.">
+<style>
+  :root {
+    --surface: #fcfcfb; --panel: #ffffff; --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #86847d;
+    --grid: #ece9e2; --hair: #e2ded5;
+    --off: #eb6834; --on: #1baf7a; --curve: #2a78d6; --accent: #0d9488; --warn: #b4820e;
+    --shadow: 0 1px 2px rgba(20,20,18,.06), 0 8px 24px rgba(20,20,18,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --surface:#17171a; --panel:#1f1f22; --ink:#f4f3ee; --ink-2:#b6b4ab; --ink-3:#7f7d75;
+      --grid:#2c2c30; --hair:#33333a; --off:#f07a4c; --on:#2dd4bf; --curve:#3987e5; --accent:#2dd4bf; --warn:#e0b345;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35); }
+  }
+  :root[data-theme="light"] { --surface:#fcfcfb; --panel:#fff; --ink:#0b0b0b; --ink-2:#52514e; --ink-3:#86847d;
+    --grid:#ece9e2; --hair:#e2ded5; --off:#eb6834; --on:#1baf7a; --curve:#2a78d6; --accent:#0d9488; --warn:#b4820e;
+    --shadow:0 1px 2px rgba(20,20,18,.06), 0 8px 24px rgba(20,20,18,.05); }
+  :root[data-theme="dark"] { --surface:#17171a; --panel:#1f1f22; --ink:#f4f3ee; --ink-2:#b6b4ab; --ink-3:#7f7d75;
+    --grid:#2c2c30; --hair:#33333a; --off:#f07a4c; --on:#2dd4bf; --curve:#3987e5; --accent:#2dd4bf; --warn:#e0b345;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35); }
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--surface); color:var(--ink); line-height:1.55;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:ui-monospace,"SF Mono","Cascadia Code","JetBrains Mono",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums; }
+  .wrap { max-width:960px; margin:0 auto; padding:56px 24px 80px; }
+
+  header { margin-bottom:34px; }
+  .eyebrow { font-family:ui-monospace,Menlo,monospace; text-transform:uppercase; letter-spacing:.14em;
+    font-size:11.5px; color:var(--accent); font-weight:600; margin:0 0 14px; }
+  h1 { font-size:clamp(28px,4.4vw,42px); line-height:1.08; margin:0 0 14px; letter-spacing:-.02em; text-wrap:balance; font-weight:680; }
+  .lede { font-size:17px; color:var(--ink-2); max-width:64ch; margin:0; }
+  .lede b { color:var(--ink); font-weight:600; }
+
+  .dl { display:inline-flex; align-items:center; gap:9px; margin-top:22px; text-decoration:none;
+    background:var(--panel); border:1px solid var(--hair); border-radius:10px; padding:11px 16px;
+    box-shadow:var(--shadow); color:var(--ink); font-size:14px; font-weight:600; transition:border-color .15s, transform .15s; }
+  .dl:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .dl svg { width:15px; height:15px; stroke:var(--accent); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .dl small { font-weight:500; color:var(--ink-3); font-size:12px; }
+
+  .tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:34px 0 10px; }
+  .tile { background:var(--panel); border:1px solid var(--hair); border-radius:12px; padding:16px 16px 14px;
+    box-shadow:var(--shadow); position:relative; overflow:hidden; }
+  .tile::before { content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--c,var(--accent)); }
+  .tile .k { font-family:ui-monospace,Menlo,monospace; text-transform:uppercase; letter-spacing:.09em;
+    font-size:10px; color:var(--ink-2); margin:0 0 8px; }
+  .tile .v { font-size:29px; font-weight:660; letter-spacing:-.02em; line-height:1; }
+  .tile .v small { font-size:13px; color:var(--ink-3); font-weight:500; margin-left:2px; }
+  .tile .s { margin-top:7px; font-size:11.5px; color:var(--ink-2); }
+  .tile.ok .v { color:var(--on); }
+
+  .card { background:var(--panel); border:1px solid var(--hair); border-radius:14px; padding:22px 22px 18px;
+    box-shadow:var(--shadow); margin-top:24px; }
+  .card h2 { margin:0 0 3px; font-size:17px; font-weight:640; letter-spacing:-.01em; }
+  .card .cap { margin:0 0 10px; font-size:13px; color:var(--ink-2); }
+  .card p { font-size:14px; color:var(--ink-2); margin:0 0 11px; }
+  .card p:last-child { margin-bottom:0; }
+  .card p b, .card li b { color:var(--ink); font-weight:640; }
+  .card ul { margin:0 0 11px; padding-left:20px; }
+  .card li { font-size:14px; color:var(--ink-2); margin-bottom:7px; }
+  .card ol { margin:0 0 11px; padding-left:20px; }
+  .card ol li { margin-bottom:8px; }
+  .card code { font-family:ui-monospace,Menlo,monospace; font-size:12.5px;
+    background:var(--grid); padding:1px 5px; border-radius:4px; color:var(--ink); }
+  .card a { color:var(--curve); text-decoration:none; border-bottom:1px solid color-mix(in srgb, var(--curve) 35%, transparent); }
+  .card a:hover { border-bottom-color:var(--curve); }
+
+  .legend { display:flex; gap:18px; flex-wrap:wrap; margin:4px 0 8px; font-size:12.5px; }
+  .legend span { display:inline-flex; align-items:center; gap:7px; color:var(--ink-2); }
+  .legend i { width:16px; height:10px; border-radius:3px; background:var(--c); display:inline-block; }
+
+  .chartbox { position:relative; width:100%; overflow-x:auto; }
+  svg.chart { width:100%; height:auto; display:block; min-width:560px; }
+  .gridline { stroke:var(--grid); stroke-width:1; }
+  .axis-txt { fill:var(--ink-3); font-size:11px; font-family:ui-monospace,Menlo,monospace; }
+  .barlab { font-family:ui-monospace,Menlo,monospace; font-weight:600; font-size:11.5px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-top:6px; }
+  th { text-align:left; font-weight:600; color:var(--ink-2); font-size:11px; text-transform:uppercase;
+    letter-spacing:.07em; padding:8px 10px; border-bottom:1px solid var(--hair); }
+  td { padding:7px 10px; border-bottom:1px solid var(--grid); font-size:13.5px; }
+  th.n { text-align:right; }
+  td.n { font-family:ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums; text-align:right; }
+  td.win { color:var(--on); font-weight:640; }
+  tr.hi td { background:color-mix(in srgb, var(--on) 6%, transparent); }
+
+  .callout { border-left:3px solid var(--warn); background:color-mix(in srgb, var(--warn) 7%, var(--panel));
+    border-radius:0 10px 10px 0; padding:14px 18px; margin:16px 0; }
+  .callout.good { border-left-color:var(--on); background:color-mix(in srgb, var(--on) 7%, var(--panel)); }
+  .callout.bad { border-left-color:var(--off); background:color-mix(in srgb, var(--off) 7%, var(--panel)); }
+  .callout h3 { margin:0 0 5px; font-size:13.5px; font-weight:660; }
+  .callout p { margin:0 0 7px; font-size:13.5px; color:var(--ink-2); }
+  .callout p:last-child { margin-bottom:0; }
+
+  .links { list-style:none; padding:0; margin:12px 0 0; }
+  .links li { margin-bottom:6px; font-size:13.5px; }
+  .links .g { font-family:ui-monospace,Menlo,monospace; font-weight:600; color:var(--ink); margin-right:8px; }
+
+  footer { margin-top:40px; padding-top:18px; border-top:1px solid var(--hair); font-size:12.5px; color:var(--ink-3); }
+  footer b { color:var(--ink-2); font-weight:600; }
+  footer a { color:var(--ink-2); }
+
+  @media (max-width:760px) { .tiles { grid-template-columns:repeat(2,1fr); } }
+
+  .ct { fill:var(--ink); font-size:13px; font-weight:600; }
+  .cl { fill:var(--ink-2); font-size:12px; }
+  .cv { fill:var(--ink-2); font-size:11.5px; font-family:ui-monospace,Menlo,monospace; }
+  .dl.soon { cursor:default; opacity:.75; }
+  .dl.soon:hover { transform:none; border-color:var(--hair); }
+  td.l { font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Orivael · Runtime governance · Public results</p>
+  <h1>A kill switch for agents: 546 ns a check, up to 76% fewer tokens</h1>
+  <p class="lede">The question we started with was not about data centres. It was about
+  <b>fitness trackers and other light tech</b>: how do you give a device with kilobytes to spare,
+  no guaranteed network and no governance server the same runtime governance Axiom gives a fleet
+  of agents? You need a stop that any component can pull and nothing can quietly undo. The answer we
+  built is one small file and a check cheap enough to make before every step. We built it for our
+  own agent runtimes first, where we could measure it, and this note reports what it costs and
+  what a stop saves.</p>
+  <span class="dl soon" aria-disabled="true">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
+    Benchmark code &amp; raw results <small>download coming soon</small>
+  </span>
+</header>
+
+<div class="tiles">
+  <div class="tile ok" style="--c:var(--on)"><p class="k">One check</p><p class="v">546<small>ns</small></p><p class="s">cached, three scopes, median</p></div>
+  <div class="tile ok" style="--c:var(--on)"><p class="k">Stop reaches another process</p><p class="v">76<small>ms p99</small></p><p class="s">50 ms poll, 200 trials</p></div>
+  <div class="tile ok" style="--c:var(--on)"><p class="k">Fleet throughput cost</p><p class="v">3.3<small>%</small></p><p class="s">10,000 agents, worst mode; run-to-run sd up to 4.0%</p></div>
+  <div class="tile ok" style="--c:var(--on)"><p class="k">Tokens an L4 saved</p><p class="v">76<small>%</small></p><p class="s">stop at 25% of a 1,000-agent run</p></div>
+</div>
+
+<section class="card">
+  <h2>Where this came from</h2>
+  <p>A fitness tracker, a smart ring or a sensor hub can't call a governance service before every
+  action. It may be offline, it has a few hundred kilobytes, and its companion app, its cloud
+  account and its own firmware all need to be able to say <i>stop</i> without negotiating with each
+  other. That ruled out a policy server, a message bus and a per-step RPC. It left four requirements:</p>
+  <ul>
+    <li><b>State any component can read and write with no server.</b> A single small file.</li>
+    <li><b>A check cheap enough to run before every step.</b> It costs nanoseconds and makes no network call.</li>
+    <li><b>Easy to pull, hard to release.</b> Anyone may raise the level. Lowering it needs a signature.</li>
+    <li><b>Fail closed.</b> A corrupt or tampered file means <i>stop</i>, not <i>go</i>.</li>
+  </ul>
+  <p>This is a project we started in June, and it isn't competing with anyone. What inspired us to
+  look back at it was
+  <a href="https://aws.amazon.com/blogs/opensource/introducing-infinity-a-runtime-for-extreme-agent-concurrency/">Infinity</a>,
+  an Apache-2.0 research runtime that AWS released on 23 October 2026 as part of the Hydro project with
+  UC Berkeley. It suspends agents while they wait on tools, so very many can run at once; our slim agent
+  fabric takes the same approach. One of the open questions its authors publish is how a runtime
+  should establish where events come from, so that actions stay traceable and accountable, without
+  giving up a stateless architecture. That is the tracker problem at fleet scale: govern many actors with no central
+  service holding the state. The kill switch is the first piece we built in answer, and the signed,
+  hash-chained receipts are the start of the provenance half.</p>
+  <p>Our agent runtimes were the place to build and measure that shape first: thousands of agents on
+  one machine, real model calls and real tokens. A tracker port is the next step, not this one (see the
+  limits below).</p>
+</section>
+
+<section class="card">
+  <h2>The ladder</h2>
+  <p class="cap">The same five levels our robot-fleet simulator already used, applied to agents.
+  Scopes are <code>fleet</code>, <code>loop:&lt;name&gt;</code>, <code>run:&lt;id&gt;</code> and <code>fabric:&lt;name&gt;</code>;
+  the highest one that applies wins.</p>
+  <table>
+    <tr><th>Level</th><th>What happens</th></tr>
+    <tr><td class="l">L1 WARNING</td><td>Receipts are flagged. Nothing else changes.</td></tr>
+    <tr><td class="l">L2 THROTTLE</td><td>Side effects wait for a human, and one model call runs at a time.</td></tr>
+    <tr><td class="l">L3 SUSPEND</td><td>No new model calls. Work checkpoints and resumes exactly once when released.</td></tr>
+    <tr><td class="l">L4 TERMINATE</td><td>In-flight work is dropped or aborted, running commands are killed with their children, and runs end for good.</td></tr>
+  </table>
+  <p style="margin-top:12px">The state is <code>.nodexloop/governance.json</code>, here 404 bytes.
+  A <b>raise</b> needs no key and can only go up. A <b>release</b> is a section HMAC-SHA256-signed
+  with a release key; it is the only way down. A missing file reads as NORMAL; an unreadable file, or a
+  release that does not verify, reads as L3. Every change appends a hash-chained receipt of about
+  205 bytes.</p>
+</section>
+
+<section class="card">
+  <h2>What a small device would pay</h2>
+  <table>
+    <tr><th>Item</th><th class="n">Measured</th></tr>
+    <tr><td>Third-party dependencies</td><td class="n">none</td></tr>
+    <tr><td>One switch object in memory</td><td class="n">2,220 B</td></tr>
+    <tr><td>State file / receipt per change</td><td class="n">404 B / 205 B</td></tr>
+    <tr><td>Cached check (3 scopes)</td><td class="n">546 ns</td></tr>
+    <tr><td>Python module import (CPython 3.13.7)</td><td class="n">29.4 ms</td></tr>
+  </table>
+  <p style="margin-top:12px">The portable part is the file format plus one HMAC-SHA256. The Python
+  module is how we measured it, not what a tracker would run: most of its import time is
+  <code>pathlib</code>, which firmware would not need.</p>
+</section>
+
+<section class="card">
+  <h2>The check costs less than a Python function call</h2>
+  <p class="cap">The level is re-read at most once per poll interval (50 ms); between reads it is a clock
+  compare and a dictionary lookup. Uncached reads show why the cache exists: on Windows, a
+  <code>stat</code> alone costs tens of microseconds.</p>
+  <div class="chartbox"><svg class="chart" viewBox="0 0 900 272" role="img" aria-label="Cost of one level() check (median, log scale)">
+<text x="0" y="16" class="ct">Cost of one level() check (median, log scale)</text>
+<text x="240" y="52" text-anchor="end" class="cl">cached, no file</text>
+<rect x="250" y="34" width="97.9" height="26" rx="4" fill="var(--on)"/>
+<text x="355.9" y="52" class="cv">303 ns</text>
+<text x="240" y="90" text-anchor="end" class="cl">cached, file present</text>
+<rect x="250" y="72" width="110.2" height="26" rx="4" fill="var(--on)"/>
+<text x="368.2" y="90" class="cv">389 ns</text>
+<text x="240" y="128" text-anchor="end" class="cl">cached, 3 scopes</text>
+<rect x="250" y="110" width="126.8" height="26" rx="4" fill="var(--on)"/>
+<text x="384.8" y="128" class="cv">546 ns</text>
+<text x="240" y="166" text-anchor="end" class="cl">empty Python call</text>
+<rect x="250" y="148" width="34.0" height="26" rx="4" fill="var(--ink-3)"/>
+<text x="292.0" y="166" class="cv">82 ns · for scale</text>
+<text x="240" y="204" text-anchor="end" class="cl">uncached, no file</text>
+<rect x="250" y="186" width="346.8" height="26" rx="4" fill="var(--warn)"/>
+<text x="604.8" y="204" class="cv">48,111 ns · stat only</text>
+<text x="240" y="242" text-anchor="end" class="cl">uncached, file present</text>
+<rect x="250" y="224" width="360.0" height="26" rx="4" fill="var(--off)"/>
+<text x="618.0" y="242" class="cv">63,004 ns · stat + read + verify</text>
+</svg></div>
+</section>
+
+<section class="card">
+  <h2>A stop reaches another process within one poll</h2>
+  <p class="cap">One process raises the level to L4 and another, checking about 2,000 times a second,
+  reports when it sees the change. 200 trials per setting. Time runs from the start of the raise, so it
+  includes the writer's own lock, write and receipt.</p>
+  <div class="chartbox"><svg class="chart" viewBox="0 0 900 272" role="img" aria-label="Raise in one process → seen in another">
+<text x="0" y="16" class="ct">Raise in one process → seen in another</text>
+<text x="240" y="52" text-anchor="end" class="cl">poll 10ms: p50</text>
+<rect x="250" y="34" width="53.9" height="26" rx="4" fill="var(--on)"/>
+<text x="311.9" y="52" class="cv">16.0 ms</text>
+<text x="240" y="90" text-anchor="end" class="cl">poll 10ms: p99</text>
+<rect x="250" y="72" width="123.3" height="26" rx="4" fill="var(--curve)"/>
+<text x="381.3" y="90" class="cv">36.6 ms · max 38 ms</text>
+<text x="240" y="128" text-anchor="end" class="cl">poll 50ms: p50</text>
+<rect x="250" y="110" width="144.2" height="26" rx="4" fill="var(--on)"/>
+<text x="402.2" y="128" class="cv">42.9 ms</text>
+<text x="240" y="166" text-anchor="end" class="cl">poll 50ms: p99</text>
+<rect x="250" y="148" width="254.0" height="26" rx="4" fill="var(--curve)"/>
+<text x="512.0" y="166" class="cv">75.5 ms · max 79 ms</text>
+<text x="240" y="204" text-anchor="end" class="cl">poll 100ms: p50</text>
+<rect x="250" y="186" width="217.0" height="26" rx="4" fill="var(--on)"/>
+<text x="475.0" y="204" class="cv">64.5 ms</text>
+<text x="240" y="242" text-anchor="end" class="cl">poll 100ms: p99</text>
+<rect x="250" y="224" width="360.0" height="26" rx="4" fill="var(--curve)"/>
+<text x="618.0" y="242" class="cv">107.0 ms · max 116 ms</text>
+</svg></div>
+  <table>
+    <tr><th>Poll</th><th class="n">p50 ms</th><th class="n">p95</th><th class="n">p99</th><th class="n">max</th><th class="n">raise write p50</th></tr>
+    <tr><td class="l">10ms</td><td class="n">16.0</td><td class="n">33.0</td><td class="n">36.6</td><td class="n">38.0</td><td class="n">16.5</td></tr><tr><td class="l">50ms</td><td class="n">42.9</td><td class="n">69.2</td><td class="n">75.5</td><td class="n">79.2</td><td class="n">38.8</td></tr><tr><td class="l">100ms</td><td class="n">64.5</td><td class="n">102.1</td><td class="n">107.0</td><td class="n">116.5</td><td class="n">29.8</td></tr>
+  </table>
+</section>
+
+<section class="card">
+  <h2>The fleet barely notices it</h2>
+  <p class="cap">10,000 agents, 5 conversational turns each, 2 completions per turn, a scripted
+  zero-latency model so only runtime overhead is measured. 5 repetitions per mode, in alternating order.</p>
+  <div class="chartbox"><svg class="chart" viewBox="0 0 900 158" role="img" aria-label="10,000 agents × 5 turns, scripted model (mean of 5)">
+<text x="0" y="16" class="ct">10,000 agents × 5 turns, scripted model (mean of 5)</text>
+<text x="240" y="52" text-anchor="end" class="cl">switch off</text>
+<rect x="250" y="34" width="360.0" height="26" rx="4" fill="var(--ink-3)"/>
+<text x="618.0" y="52" class="cv">3,272 completions/s · ±44</text>
+<text x="240" y="90" text-anchor="end" class="cl">on, no file</text>
+<rect x="250" y="72" width="348.2" height="26" rx="4" fill="var(--on)"/>
+<text x="606.2" y="90" class="cv">3,165 completions/s · ±126 · -3.3%</text>
+<text x="240" y="128" text-anchor="end" class="cl">on, fleet at L1</text>
+<rect x="250" y="110" width="352.9" height="26" rx="4" fill="var(--on)"/>
+<text x="610.9" y="128" class="cv">3,207 completions/s · ±54 · -2.0%</text>
+</svg></div>
+  <table>
+    <tr><th>Mode</th><th class="n">completions/s</th><th class="n">vs off</th><th class="n">fleet RSS MB</th><th class="n">KB / agent</th></tr>
+    <tr><td>switch off</td><td class="n">3,272 ± 44</td><td class="n"></td><td class="n">152.4</td><td class="n">15.2</td></tr><tr><td>on, no file</td><td class="n">3,165 ± 126</td><td class="n">-3.3%</td><td class="n">152.4</td><td class="n">15.2</td></tr><tr><td>on, fleet at L1</td><td class="n">3,207 ± 54</td><td class="n">-2.0%</td><td class="n">152.2</td><td class="n">15.2</td></tr>
+  </table>
+</section>
+
+<section class="card">
+  <h2>What a stop saves, and what it can't</h2>
+  <p class="cap">1,000 agents, one task each (model → tool → model), 8 model slots, a simulated model:
+  20 ms prefill and 2 ms per output token, 128 output
+  tokens per call. Unstopped, it spends 256,000 output tokens in 69.4 s. The stop
+  lands about 25% of the way through.</p>
+  <div class="chartbox"><svg class="chart" viewBox="0 0 900 158" role="img" aria-label="Output tokens, 1,000 agents, simulated model">
+<text x="0" y="16" class="ct">Output tokens, 1,000 agents, simulated model</text>
+<text x="240" y="52" text-anchor="end" class="cl">no stop (runs to completion)</text>
+<rect x="250" y="34" width="360.0" height="26" rx="4" fill="var(--off)"/>
+<text x="618.0" y="52" class="cv">256,000 output tokens</text>
+<text x="240" y="90" text-anchor="end" class="cl">L4 at 25% of the run</text>
+<rect x="250" y="72" width="85.9" height="26" rx="4" fill="var(--on)"/>
+<text x="343.9" y="90" class="cv">61,069 output tokens · saved 76%</text>
+<text x="240" y="128" text-anchor="end" class="cl">…of which after the stop</text>
+<rect x="250" y="110" width="2.0" height="26" rx="4" fill="var(--warn)"/>
+<text x="260.0" y="128" class="cv">729 output tokens · in-flight decode tails</text>
+</svg></div>
+  <table>
+    <tr><th>Stop</th><th class="n">halt ms p50</th><th class="n">p95</th><th class="n">calls started after</th><th class="n">in flight</th><th class="n">tokens after stop</th></tr>
+    <tr><td class="l">L3 SUSPEND</td><td class="n">291.5</td><td class="n">341.5</td><td class="n">4</td><td class="n">8</td><td class="n">705</td></tr>
+    <tr class="hi"><td class="l">L4 TERMINATE</td><td class="n">235.4</td><td class="n">347.1</td><td class="n">6</td><td class="n">8</td><td class="n">729</td></tr>
+  </table>
+  <p style="margin-top:12px">L4 saved <b>76%</b> of the run's output tokens on average
+  (70–79% across 10 trials). What still gets spent has
+  two sources. The larger one is the decode tails of the 8 calls already on a model
+  slot, which the Python fabric lets finish before dropping their replies. The smaller is a few calls that <b>started after</b>
+  the raise: up to 6 out of 2,000 (mean 1.5 at L4,
+  0.8 at L3). They start in the window before the fleet's next 50 ms poll sees the
+  change, and the window also includes the writer's own lock and write. That is the price of a check that costs
+  nanoseconds instead of a <code>stat</code>: a shorter poll narrows the window, and the propagation table shows what it costs.
+  After an L3 release, every task finished exactly once (yes in every trial).</p>
+</section>
+
+<section class="card">
+  <h2>A real model: drain versus abort</h2>
+  <p class="cap">qwen2.5-coder:3b on Ollama (NVIDIA GeForce GTX 1660 Ti, 6144 MiB), 8 streamed calls of up to
+  256 tokens, one at a time. An L4 lands 30–45% of the way through. <b>Drain</b> lets the
+  call in flight finish, as the Python fabric does today. <b>Abort</b> closes the stream, as the NodeXLoop
+  extension does with its per-call AbortController.</p>
+  <div class="chartbox"><svg class="chart" viewBox="0 0 900 120" role="img" aria-label="Real model (qwen2.5-coder:3b): tokens generated after an L4">
+<text x="0" y="16" class="ct">Real model (qwen2.5-coder:3b): tokens generated after an L4</text>
+<text x="240" y="52" text-anchor="end" class="cl">drain (Python fabric today)</text>
+<rect x="250" y="34" width="360.0" height="26" rx="4" fill="var(--off)"/>
+<text x="618.0" y="52" class="cv">117.3 tokens after the stop</text>
+<text x="240" y="90" text-anchor="end" class="cl">abort the stream (extension)</text>
+<rect x="250" y="72" width="9.2" height="26" rx="4" fill="var(--on)"/>
+<text x="267.2" y="90" class="cv">3.0 tokens after the stop</text>
+</svg></div>
+  <table>
+    <tr><th>Mode</th><th class="n">tokens after stop (mean)</th><th class="n">halt ms p50</th><th class="n">tokens saved (mean)</th><th class="n">next request TTFT ms</th></tr>
+    <tr><td>drain</td><td class="n">117.3</td><td class="n">1,596.0</td><td class="n">1,109</td><td class="n">47</td></tr>
+    <tr class="hi"><td>abort</td><td class="n">3.0</td><td class="n">37.5</td><td class="n">1,416</td><td class="n">63</td></tr>
+  </table>
+  <p style="margin-top:12px">Unstopped: 2,048 tokens at 83.4 tokens/s;
+  idle time to first token 28 ms. The next request's time to first token checks that the server
+  really stopped generating when the stream closed. If it had kept going, that request would have queued behind it.</p>
+</section>
+
+<section class="card">
+  <h2>Running commands die with their children</h2>
+  <p class="cap">An agent-loop <code>run</code> node starts a 60 s command that spawns a grandchild set to write a marker
+  file after 3 s. An L4 lands 1 s in. 20 trials.</p>
+  <table>
+    <tr><th>Measure</th><th class="n">Result</th></tr>
+    <tr><td>Raise → run terminated, p50 / p95 / max</td><td class="n">691 / 927 / 1,057 ms</td></tr>
+    <tr><td>Trials where the grandchild survived the kill</td><td class="n">0 of 20</td></tr>
+  </table>
+  <p style="margin-top:12px">On Windows, most of that time is <code>taskkill /T</code> walking the process tree. POSIX kills the process group with one signal.</p>
+</section>
+
+<section class="card">
+  <h2>What we're honest about</h2>
+  <ul>
+    <li><b>Nothing here ran on a tracker.</b> Every number is from one 12-thread Windows desktop
+    (Intel64 Family 6 Model 165 Stepping 2, GenuineIntel, 17.0 GB). The design is aimed at light devices; the measurement isn't from one yet.
+    Testing on a Jetson Orin Nano Super is next, then a microcontroller port of the file reader in C.</li>
+    <li><b>The halt experiment's tokens are simulated</b> (timed sleeps for prefill and decode). The live experiment
+    is the one with real tokens, and it runs one call at a time against one Ollama slot.</li>
+    <li><b>The Python fabric drains, it doesn't abort.</b> An L4 drops replies that land after the stop, but the
+    tokens of a call already on a slot are spent. The live comparison shows what an abort-aware backend would
+    save; building one is open work.</li>
+    <li><b>A raise isn't free for the writer.</b> Locking, writing and receipting took 39 ms
+    (p50) here. That's acceptable for a rare action, but it's measurable.</li>
+    <li><b>Not a security boundary against code running as the same user.</b> Such code can read the release
+    key. The guarantees are that a stop always works and a release is always deliberate and receipted.</li>
+  </ul>
+  <div class="callout">
+    <h3>The open problem</h3>
+    <p>How small can the reader get? A firmware implementation needs a JSON reader, HMAC-SHA256 and a
+    clock. We think that fits in a few kilobytes of flash, but we haven't measured it yet.</p>
+  </div>
+</section>
+
+<footer>
+  <b>Orivael</b> · public research notes · runs dated 2026-11-06 · Windows-11-10.0.26300-SP0 · Python 3.13.7 ·
+  code: <code>axiom_fleet_level</code>, <code>axiom_loops</code>, <code>axiom_agent_fabric</code>, NodeXLoop extension ·
+  <a href="/">all notes</a>
+</footer>
+
+</div>
+</body>
+</html>

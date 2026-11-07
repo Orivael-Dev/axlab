@@ -1,0 +1,9 @@
+<svg class="chart" viewBox="0 0 900 120" role="img" aria-label="Real model (qwen2.5-coder:3b): tokens generated after an L4">
+<text x="0" y="16" class="ct">Real model (qwen2.5-coder:3b): tokens generated after an L4</text>
+<text x="240" y="52" text-anchor="end" class="cl">drain (Python fabric today)</text>
+<rect x="250" y="34" width="360.0" height="26" rx="4" fill="var(--off)"/>
+<text x="618.0" y="52" class="cv">117.3 tokens after the stop</text>
+<text x="240" y="90" text-anchor="end" class="cl">abort the stream (extension)</text>
+<rect x="250" y="72" width="9.2" height="26" rx="4" fill="var(--on)"/>
+<text x="267.2" y="90" class="cv">3.0 tokens after the stop</text>
+</svg>

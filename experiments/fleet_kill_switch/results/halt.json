@@ -1,0 +1,367 @@
+{
+ "experiment": "halt",
+ "host": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+  "cores": 12,
+  "ram_gb": 17.0,
+  "python": "3.13.7",
+  "gpu": "NVIDIA GeForce GTX 1660 Ti, 6144 MiB",
+  "at": "2026-11-06T22:52:08Z"
+ },
+ "quick": false,
+ "config": {
+  "agents": 1000,
+  "slots": 8,
+  "prefill_ms": 20.0,
+  "ms_per_token": 2.0,
+  "out_tokens": 128,
+  "in_tokens": 320,
+  "poll_s": 0.05,
+  "raise_at_s": 17.349
+ },
+ "baseline": {
+  "level": 0,
+  "halted": "",
+  "steps": 2000,
+  "archived": 0,
+  "total_in": 640000,
+  "total_out": 256000,
+  "wall_s": 69.39433709997684
+ },
+ "L3": {
+  "trials": [
+   {
+    "level": 3,
+    "halted": "",
+    "steps": 2000,
+    "archived": 0,
+    "total_in": 640000,
+    "total_out": 256000,
+    "wall_s": 15.344363300013356,
+    "halt_latency_ms": 291.53299995232373,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 893,
+    "resumed": {
+     "tasks_done": 1000,
+     "halted_after": ""
+    },
+    "steps_total_after_resume": 2000,
+    "out_tokens_saved": null
+   },
+   {
+    "level": 3,
+    "halted": "",
+    "steps": 2000,
+    "archived": 0,
+    "total_in": 640000,
+    "total_out": 256000,
+    "wall_s": 15.334965800051577,
+    "halt_latency_ms": 325.51970006898046,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 308,
+    "resumed": {
+     "tasks_done": 1000,
+     "halted_after": ""
+    },
+    "steps_total_after_resume": 2000,
+    "out_tokens_saved": null
+   },
+   {
+    "level": 3,
+    "halted": "",
+    "steps": 2000,
+    "archived": 0,
+    "total_in": 640000,
+    "total_out": 256000,
+    "wall_s": 15.66729380004108,
+    "halt_latency_ms": 341.50710003450513,
+    "calls_started_after_raise": 4,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 1031,
+    "resumed": {
+     "tasks_done": 1000,
+     "halted_after": ""
+    },
+    "steps_total_after_resume": 2000,
+    "out_tokens_saved": null
+   },
+   {
+    "level": 3,
+    "halted": "",
+    "steps": 2000,
+    "archived": 0,
+    "total_in": 640000,
+    "total_out": 256000,
+    "wall_s": 20.395226199994795,
+    "halt_latency_ms": 217.59919996839017,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 584,
+    "resumed": {
+     "tasks_done": 1000,
+     "halted_after": ""
+    },
+    "steps_total_after_resume": 2000,
+    "out_tokens_saved": null
+   },
+   {
+    "level": 3,
+    "halted": "",
+    "steps": 2000,
+    "archived": 0,
+    "total_in": 640000,
+    "total_out": 256000,
+    "wall_s": 17.577489500050433,
+    "halt_latency_ms": 247.93479999061674,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 707,
+    "resumed": {
+     "tasks_done": 1000,
+     "halted_after": ""
+    },
+    "steps_total_after_resume": 2000,
+    "out_tokens_saved": null
+   }
+  ],
+  "halt_latency_ms": {
+   "n": 5,
+   "mean": 284.8,
+   "sd": 51.9,
+   "p50": 291.5,
+   "p95": 341.5,
+   "p99": 341.5,
+   "max": 341.5,
+   "min": 217.6
+  },
+  "calls_started_after_raise": {
+   "n": 5,
+   "mean": 0.8,
+   "sd": 1.79,
+   "p50": 0,
+   "p95": 4,
+   "p99": 4,
+   "max": 4,
+   "min": 0
+  },
+  "calls_in_flight_at_raise": {
+   "n": 5,
+   "mean": 8.0,
+   "sd": 0.0,
+   "p50": 8,
+   "p95": 8,
+   "p99": 8,
+   "max": 8,
+   "min": 8
+  },
+  "out_tokens_after_raise": {
+   "n": 5,
+   "mean": 704.6,
+   "sd": 280.1,
+   "p50": 707,
+   "p95": 1031,
+   "p99": 1031,
+   "max": 1031,
+   "min": 308
+  },
+  "resume_exactly_once": true
+ },
+ "L4": {
+  "trials": [
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 440,
+    "archived": 1000,
+    "total_in": 143360,
+    "total_out": 57344,
+    "wall_s": 15.65360179997515,
+    "halt_latency_ms": 246.12689996138215,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 761,
+    "out_tokens_saved": 198656
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 576,
+    "archived": 1000,
+    "total_in": 186880,
+    "total_out": 74752,
+    "wall_s": 20.39234859996941,
+    "halt_latency_ms": 218.54170004371554,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 665,
+    "out_tokens_saved": 181248
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 592,
+    "archived": 1000,
+    "total_in": 192000,
+    "total_out": 76800,
+    "wall_s": 20.96045549993869,
+    "halt_latency_ms": 158.32960000261664,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 422,
+    "out_tokens_saved": 179200
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 488,
+    "archived": 1000,
+    "total_in": 158720,
+    "total_out": 63488,
+    "wall_s": 17.32701449992601,
+    "halt_latency_ms": 316.1361999809742,
+    "calls_started_after_raise": 4,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 1028,
+    "out_tokens_saved": 192512
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 424,
+    "archived": 1000,
+    "total_in": 138240,
+    "total_out": 55296,
+    "wall_s": 15.059921400039457,
+    "halt_latency_ms": 196.32690004073083,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 639,
+    "out_tokens_saved": 200704
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 432,
+    "archived": 1000,
+    "total_in": 140800,
+    "total_out": 56320,
+    "wall_s": 15.363419199944474,
+    "halt_latency_ms": 147.0460999989882,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 368,
+    "out_tokens_saved": 199680
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 416,
+    "archived": 1000,
+    "total_in": 135680,
+    "total_out": 54272,
+    "wall_s": 14.840791699942201,
+    "halt_latency_ms": 328.4542999463156,
+    "calls_started_after_raise": 6,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 1060,
+    "out_tokens_saved": 201728
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 464,
+    "archived": 1000,
+    "total_in": 151040,
+    "total_out": 60416,
+    "wall_s": 16.502199199981987,
+    "halt_latency_ms": 235.3855000110343,
+    "calls_started_after_raise": 0,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 740,
+    "out_tokens_saved": 195584
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 416,
+    "archived": 1000,
+    "total_in": 135680,
+    "total_out": 54272,
+    "wall_s": 14.828460299992003,
+    "halt_latency_ms": 315.51899993792176,
+    "calls_started_after_raise": 2,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 1026,
+    "out_tokens_saved": 201728
+   },
+   {
+    "level": 4,
+    "halted": "L4 TERMINATE",
+    "steps": 443,
+    "archived": 1000,
+    "total_in": 144320,
+    "total_out": 57728,
+    "wall_s": 15.891235899995081,
+    "halt_latency_ms": 347.0611999509856,
+    "calls_started_after_raise": 3,
+    "calls_in_flight_at_raise": 8,
+    "out_tokens_after_raise": 582,
+    "out_tokens_saved": 198272
+   }
+  ],
+  "halt_latency_ms": {
+   "n": 10,
+   "mean": 250.9,
+   "sd": 72.5,
+   "p50": 235.4,
+   "p95": 347.1,
+   "p99": 347.1,
+   "max": 347.1,
+   "min": 147.0
+  },
+  "calls_started_after_raise": {
+   "n": 10,
+   "mean": 1.5,
+   "sd": 2.17,
+   "p50": 0,
+   "p95": 6,
+   "p99": 6,
+   "max": 6,
+   "min": 0
+  },
+  "calls_in_flight_at_raise": {
+   "n": 10,
+   "mean": 8.0,
+   "sd": 0.0,
+   "p50": 8,
+   "p95": 8,
+   "p99": 8,
+   "max": 8,
+   "min": 8
+  },
+  "out_tokens_after_raise": {
+   "n": 10,
+   "mean": 729.1,
+   "sd": 246.5,
+   "p50": 665,
+   "p95": 1060,
+   "p99": 1060,
+   "max": 1060,
+   "min": 368
+  },
+  "out_tokens_saved": {
+   "n": 10,
+   "mean": 194931.2,
+   "sd": 8261.6,
+   "p50": 198272,
+   "p95": 201728,
+   "p99": 201728,
+   "max": 201728,
+   "min": 179200
+  },
+  "saved_pct": 76.1
+ }
+}

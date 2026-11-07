@@ -1,0 +1,27 @@
+{
+ "experiment": "runnode",
+ "host": {
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 165 Stepping 2, GenuineIntel",
+  "cores": 12,
+  "ram_gb": 17.0,
+  "python": "3.13.7",
+  "gpu": "NVIDIA GeForce GTX 1660 Ti, 6144 MiB",
+  "at": "2026-11-06T22:57:55Z"
+ },
+ "quick": false,
+ "trials": 20,
+ "kill_latency_ms": {
+  "n": 20,
+  "mean": 697.6,
+  "sd": 134.2,
+  "p50": 691.2,
+  "p95": 927.2,
+  "p99": 1057.3,
+  "max": 1057.3,
+  "min": 530.2
+ },
+ "grandchild_survived": 0,
+ "grandchild_checked": 20,
+ "note": "includes taskkill /T on Windows"
+}
