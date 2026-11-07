@@ -21,7 +21,7 @@ service.
 git clone https://github.com/Orivael-Dev/axlab && cd axlab
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -e ".[test]"
-pytest                                             # 55 tests, a few seconds
+pytest                                             # 65 tests, ~10 seconds
 
 # 1,000 agents with a scripted model (no model calls, no network)
 python experiments/slim_fabric/bench.py --agents 1000 --templates 10 --live 50 --backend fake
@@ -49,12 +49,21 @@ only talks to the Ollama URL you give it (default `http://localhost:11434`).
 
 To add a new track, see [docs/ADDING_RESEARCH.md](docs/ADDING_RESEARCH.md).
 
+## MCP server
+
+`python -m axlab.mcp` gives an agent a kill switch it can pull but not
+release (L1 warn … L4 terminate, with a reason, written to a receipt log),
+and runs the benchmarks above on request. Lowering the switch stays a signed
+human step on the command line. It uses only the standard library, and this
+repo's `.mcp.json` registers it for Claude Code. See [docs/MCP.md](docs/MCP.md).
+
 ## What's in the repo
 
 ```text
 axlab/                  audited code the experiments measure
   fabric/               slim agent fabric: pool, board, store, runtime, backends
   governance/           fleet kill switch (stdlib only)
+  mcp/                  MCP server: kill switch + benchmarks (python -m axlab.mcp)
   signing.py            per-module HMAC key derivation
 experiments/<track>/    one folder per research track: bench, README, results, figures
 results/                reference summaries; your own runs go in results/local/ (git-ignored)

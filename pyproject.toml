@@ -19,6 +19,9 @@ dependencies = [
 bench = ["psutil>=5.9", "requests>=2.31"]
 test = ["pytest>=8", "psutil>=5.9", "requests>=2.31"]
 
+[project.scripts]
+axlab-mcp = "axlab.mcp.server:main"
+
 [project.urls]
 Homepage = "https://github.com/Orivael-Dev/axlab"
 Research = "https://research.orivael.dev"

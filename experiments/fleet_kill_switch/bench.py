@@ -590,7 +590,12 @@ def main(argv=None):
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--model", default=os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:3b"))
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--results-dir", default=None,
+                    help="write results/*.json here instead of next to this file")
     args = ap.parse_args(argv)
+    if args.results_dir:
+        global RESULTS
+        RESULTS = Path(args.results_dir)
     random.seed(args.seed)
     names = list(EXPS) if args.which == "all" else [args.which]
     for n in names:

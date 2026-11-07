@@ -16,6 +16,7 @@ visibility. AxLab is built from copied files only (see [PROVENANCE.md](PROVENANC
 - [x] Default runs make no network calls and no paid model requests (Ollama is opt-in and local).
 - [x] Tests pass in a fresh virtualenv with no AXIOM install, no inherited `PYTHONPATH`, and no master key.
 - [x] The 1k scripted run completes from the clean environment.
+- [x] MCP server (`axlab/mcp/`): raise-only kill switch + benchmarks, with stdio tests.
 
 ## Still open
 

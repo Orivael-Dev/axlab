@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "axlab": {
+      "command": "python",
+      "args": ["-m", "axlab.mcp"]
+    }
+  }
+}
