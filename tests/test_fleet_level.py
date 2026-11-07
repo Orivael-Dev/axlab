@@ -237,9 +237,16 @@ def test_fabric_throttle_runs_one_slot(tmp_path):
 def test_fabric_suspend_holds_then_resumes(tmp_path):
     from axlab.fabric.slim_pool import AgentState
 
+    raised = []
+
     async def lookup(a):
-        _sw(tmp_path).raise_level("fleet", 3, by="ops", reason="drill")
-        await asyncio.sleep(0.02)
+        # Only the first call raises: a second raise to the same level is
+        # refused, the tool would fail at once, and its agent would take
+        # another turn inside the 5 ms poll window, before the stop is seen.
+        if not raised:
+            raised.append(1)
+            _sw(tmp_path).raise_level("fleet", 3, by="ops", reason="drill")
+        await asyncio.sleep(0.02)                 # every tool outlasts the poll
         return "ok"
 
     rt, pool, B = _fabric(tmp_path, lambda p: "DONE" if "[tool " in p else "TOOL lookup {}",
@@ -261,8 +268,12 @@ def test_fabric_suspend_holds_then_resumes(tmp_path):
 
 
 def test_fabric_terminate_archives_and_refuses(tmp_path):
+    raised = []
+
     async def lookup(a):
-        _sw(tmp_path).raise_level("fleet", 4, by="ops", reason="kill")
+        if not raised:                            # see test_fabric_suspend_holds_then_resumes
+            raised.append(1)
+            _sw(tmp_path).raise_level("fleet", 4, by="ops", reason="kill")
         await asyncio.sleep(5)                    # cancelled by the stop, not awaited
         return "never"
 
