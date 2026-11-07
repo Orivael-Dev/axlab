@@ -1,0 +1,68 @@
+{
+  "source": "research results supplied by Orivael, not independently reproduced by this scaffold",
+  "caution": "Summary only; raw logs, source revision and full host manifests required for independent verification",
+  "jetson_fabric": {
+    "agent_instances": 75000,
+    "agent_types": 50,
+    "parked_fraction": 0.5,
+    "build_seconds": 3.9,
+    "park_seconds": 2.0,
+    "python_heap_mb": 53,
+    "heap_bytes_per_agent": 702,
+    "process_rss_mb": 350,
+    "parked_transcript_mb": 163.2,
+    "event_route_typical_ms": 1.9,
+    "event_route_p95_ms": 2.1,
+    "scripted_live": {
+      "events": 200,
+      "tasks_completed": 143,
+      "events_lost_reported": 0,
+      "model_turns": 286,
+      "tool_calls": 143,
+      "runtime_errors": 0,
+      "model": "stand-in model, 50 ms per turn",
+      "slots": 2
+    }
+  },
+  "jetson_governance": {
+    "l4_transcripts_before_mb": 163.2,
+    "l4_transcripts_retained_after_mb": 0,
+    "l4_inbox_after": 0,
+    "l4_model_cases": ["stand-in", "local Qwen"],
+    "l3_resumption": "exactly-once checks passed",
+    "process_rss_drop_mb": 22,
+    "jetson_tests_passed": 75,
+    "jetson_tests_total": 75,
+    "windows_tests_passed": 74,
+    "windows_tests_total": 75
+  },
+  "jetson_qwen": {
+    "model": "Qwen3-0.6B",
+    "events": 40,
+    "tasks_completed": 45,
+    "model_turns": 60,
+    "tokens_input": 9036,
+    "tokens_output": 1754,
+    "total_tokens": 10790,
+    "wall_seconds": 33
+  },
+  "android_apk": {
+    "device": "Samsung SM-F936U",
+    "android": "16",
+    "soc": "SM8475",
+    "runner": "apk-inproc",
+    "threads": 4,
+    "n_ctx": 2048,
+    "turns": 147,
+    "model_load_ms": 889.896,
+    "decode_tokens_per_second": 41.312,
+    "prompt_prefill_tokens_per_second": 190.934,
+    "wall_ms_p50": 1079.97,
+    "wall_ms_p95": 2166.18,
+    "run_seconds": 162.914,
+    "battery_temperature_c_start": 33.7,
+    "battery_temperature_c_end": 37.4,
+    "model_identity": "not identified in supplied APK report",
+    "phone_agent_fabric_tested": false
+  }
+}

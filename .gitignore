@@ -1,0 +1,15 @@
+__pycache__/
+.pytest_cache/
+.venv/
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.gguf
+*.apk
+*.sqlite
+*.db
+.nodexloop/
+results/local/
+!results/.gitkeep
