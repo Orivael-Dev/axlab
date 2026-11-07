@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 582" width="960" height="582" role="img" aria-labelledby="t d">
+<title id="t">Jetson Orin Nano Super reference results</title>
+<desc id="d">75,000 agents in 350 MB process RSS; L4 terminate frees 163.2 MB of transcripts to 0 MB; summary-only reference numbers, not independently reproduced.</desc>
+<style>
+  .bg { fill: #fcfcfb; } .card { fill: #f3f2ef; }
+  .t1 { fill: #0b0b0b; } .t2 { fill: #52514e; } .t3 { fill: #75746f; }
+  .bar { fill: #2a78d6; } .track { fill: #e4e3df; } .grid { stroke: #d6d5d0; }
+  .warn { fill: #9a6400; }
+  text { font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  .num { font-variant-numeric: tabular-nums; }
+  @media (prefers-color-scheme: dark) {
+    .bg { fill: #1a1a19; } .card { fill: #242423; }
+    .t1 { fill: #f0efec; } .t2 { fill: #c3c2b7; } .t3 { fill: #9a998f; }
+    .bar { fill: #3987e5; } .track { fill: #33332f; } .grid { stroke: #3a3a36; }
+    .warn { fill: #e0a640; }
+  }
+</style>
+<rect width="960" height="582" class="bg"/>
+<text x="24" y="38" class="t1" font-size="20" font-weight="600" text-anchor="start">Jetson Orin Nano Super · 8 GB unified memory</text>
+<text x="24" y="62" class="warn" font-size="13" font-weight="500" text-anchor="start">Reference results from Orivael's own runs. Raw logs are not published yet: claims to reproduce, not verified facts.</text>
+<rect x="24.0" y="84" width="219.0" height="104" rx="8" class="card"/>
+<text x="40.0" y="110" class="t2" font-size="13" font-weight="500" text-anchor="start">Agents instantiated</text>
+<text x="40.0" y="148" class="t1 num" font-size="32" font-weight="600">75,000<tspan class="t2" font-size="16" font-weight="400" dx="4"></tspan></text>
+<text x="40.0" y="172" class="t3" font-size="12" font-weight="400" text-anchor="start">50 templates · 50% parked</text>
+<rect x="255.0" y="84" width="219.0" height="104" rx="8" class="card"/>
+<text x="271.0" y="110" class="t2" font-size="13" font-weight="500" text-anchor="start">Process RSS</text>
+<text x="271.0" y="148" class="t1 num" font-size="32" font-weight="600">350<tspan class="t2" font-size="16" font-weight="400" dx="4">MB</tspan></text>
+<text x="271.0" y="172" class="t3" font-size="12" font-weight="400" text-anchor="start">53 MB traced Python heap</text>
+<rect x="486.0" y="84" width="219.0" height="104" rx="8" class="card"/>
+<text x="502.0" y="110" class="t2" font-size="13" font-weight="500" text-anchor="start">Heap per agent</text>
+<text x="502.0" y="148" class="t1 num" font-size="32" font-weight="600">702<tspan class="t2" font-size="16" font-weight="400" dx="4">B</tspan></text>
+<text x="502.0" y="172" class="t3" font-size="12" font-weight="400" text-anchor="start">build 3.9 s · park 2.0 s</text>
+<rect x="717.0" y="84" width="219.0" height="104" rx="8" class="card"/>
+<text x="733.0" y="110" class="t2" font-size="13" font-weight="500" text-anchor="start">Event routing, typical</text>
+<text x="733.0" y="148" class="t1 num" font-size="32" font-weight="600">1.9<tspan class="t2" font-size="16" font-weight="400" dx="4">ms</tspan></text>
+<text x="733.0" y="172" class="t3" font-size="12" font-weight="400" text-anchor="start">p95 2.1 ms</text>
+<rect x="24.0" y="200" width="219.0" height="104" rx="8" class="card"/>
+<text x="40.0" y="226" class="t2" font-size="13" font-weight="500" text-anchor="start">Scripted live: tasks done</text>
+<text x="40.0" y="264" class="t1 num" font-size="32" font-weight="600">143<tspan class="t2" font-size="16" font-weight="400" dx="4"></tspan></text>
+<text x="40.0" y="288" class="t3" font-size="12" font-weight="400" text-anchor="start">200 events · 0 errors · 0 lost</text>
+<rect x="255.0" y="200" width="219.0" height="104" rx="8" class="card"/>
+<text x="271.0" y="226" class="t2" font-size="13" font-weight="500" text-anchor="start">Live Qwen3-0.6B: tokens</text>
+<text x="271.0" y="264" class="t1 num" font-size="32" font-weight="600">10,790<tspan class="t2" font-size="16" font-weight="400" dx="4"></tspan></text>
+<text x="271.0" y="288" class="t3" font-size="12" font-weight="400" text-anchor="start">45 tasks · 60 turns · 33 s</text>
+<rect x="486.0" y="200" width="219.0" height="104" rx="8" class="card"/>
+<text x="502.0" y="226" class="t2" font-size="13" font-weight="500" text-anchor="start">Fleet L3 SUSPEND</text>
+<text x="502.0" y="264" class="t1 num" font-size="32" font-weight="600">Pass<tspan class="t2" font-size="16" font-weight="400" dx="4"></tspan></text>
+<text x="502.0" y="288" class="t3" font-size="12" font-weight="400" text-anchor="start">state kept · exactly-once resume</text>
+<rect x="717.0" y="200" width="219.0" height="104" rx="8" class="card"/>
+<text x="733.0" y="226" class="t2" font-size="13" font-weight="500" text-anchor="start">Kill-switch tests</text>
+<text x="733.0" y="264" class="t1 num" font-size="32" font-weight="600">75/75<tspan class="t2" font-size="16" font-weight="400" dx="4"></tspan></text>
+<text x="733.0" y="288" class="t3" font-size="12" font-weight="400" text-anchor="start">passed on the Jetson</text>
+<text x="24" y="346" class="t1" font-size="15" font-weight="600" text-anchor="start">Fleet L4 TERMINATE: memory freed (MB)</text>
+<line x1="274.0" x2="274.0" y1="360" y2="458" class="grid" stroke-width="1"/>
+<text x="274.0" y="476" class="t3 num" font-size="11" font-weight="400" text-anchor="middle">0</text>
+<line x1="449.2" x2="449.2" y1="360" y2="458" class="grid" stroke-width="1"/>
+<text x="449.2" y="476" class="t3 num" font-size="11" font-weight="400" text-anchor="middle">50</text>
+<line x1="624.5" x2="624.5" y1="360" y2="458" class="grid" stroke-width="1"/>
+<text x="624.5" y="476" class="t3 num" font-size="11" font-weight="400" text-anchor="middle">100</text>
+<line x1="799.7" x2="799.7" y1="360" y2="458" class="grid" stroke-width="1"/>
+<text x="799.7" y="476" class="t3 num" font-size="11" font-weight="400" text-anchor="middle">150</text>
+<text x="24" y="379" class="t2" font-size="13" font-weight="400" text-anchor="start">Retained transcripts, before L4</text>
+<rect x="274" y="364" width="572.0" height="22" rx="4" class="bar"/>
+<text x="854.0" y="379" class="t1 num" font-size="13" font-weight="600" text-anchor="start">163.2 MB</text>
+<text x="24" y="413" class="t2" font-size="13" font-weight="400" text-anchor="start">Retained transcripts, after L4</text>
+<rect x="274" y="408.0" width="2" height="2" class="t3"/>
+<text x="282.0" y="413" class="t1 num" font-size="13" font-weight="600" text-anchor="start">0 MB</text>
+<text x="24" y="447" class="t2" font-size="13" font-weight="400" text-anchor="start">Process RSS released to the OS</text>
+<rect x="274" y="432" width="77.1" height="22" rx="4" class="bar"/>
+<text x="359.1" y="447" class="t1 num" font-size="13" font-weight="600" text-anchor="start">22 MB</text>
+<text x="24" y="500" class="t3" font-size="12" font-weight="400" text-anchor="start">Pending inboxes after L4: 0. RSS fell less than the transcripts freed: Python's allocator can keep freed memory.</text>
+<line x1="24" x2="936" y1="514" y2="514" class="grid"/>
+<text x="24" y="530" class="t3" font-size="12" font-weight="400" text-anchor="start">The 75k-agent runs use a stand-in model, 50 ms per turn on 2 slots: not 75,000 simultaneous model inferences.</text>
+<text x="24" y="548" class="t3" font-size="12" font-weight="400" text-anchor="start">The Qwen3-0.6B run is a separate, smaller live workload.</text>
+<text x="24" y="566" class="t3" font-size="12" font-weight="400" text-anchor="start">Source: results/reference_summary.json · regenerate with python tools/jetson_figure.py</text>
+</svg>

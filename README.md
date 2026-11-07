@@ -21,7 +21,7 @@ service.
 git clone https://github.com/Orivael-Dev/axlab && cd axlab
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -e ".[test]"
-pytest                                             # 65 tests, ~10 seconds
+pytest                                             # 66 tests, ~10 seconds
 
 # 1,000 agents with a scripted model (no model calls, no network)
 python experiments/slim_fabric/bench.py --agents 1000 --templates 10 --live 50 --backend fake
@@ -76,6 +76,8 @@ imports were changed, plus a few cuts. [docs/PROVENANCE.md](docs/PROVENANCE.md)
 lists every file and every change.
 
 ## Reference results (from Orivael, not yet independently reproduced)
+
+![Jetson Orin Nano Super reference results: 75,000 agents in 350 MB RSS; L4 frees 163.2 MB of transcripts](results/figures/jetson_reference.svg)
 
 | Experiment | Hardware | Observed | Important boundary |
 |---|---|---|---|
