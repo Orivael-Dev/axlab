@@ -260,6 +260,7 @@ def test_fabric_suspend_holds_then_resumes(tmp_path):
         assert held["READY"] == 2 and held["WAITING_TOOL"] == 0   # tools finished
         steps_at_hold = first.steps
         _sw(tmp_path).release("fleet", 0, by="tony", reason="over")
+        rt.switch.refresh()       # a level change is seen within poll_s; don't race it
         second = await rt.run_until_idle()
         assert second.halted == "" and second.steps == steps_at_hold + 2
         assert pool.count_by_state()["DORMANT"] == 2
