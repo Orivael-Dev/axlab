@@ -15,6 +15,9 @@ Memory policy:
   - The hot set as a whole is bounded by ``hot_budget_bytes``; when over,
     least-recently-used contexts are parked to SQLite and reloaded on
     next access.
+  - ``drop()`` releases an agent that can never run again (archived by a
+    fleet L4): hot context, parked copy and undelivered inbox go; the
+    ``history`` audit rows stay on disk.
 
 Agents talk by text, not hidden states: AgentMessage is HMAC-signed so the
 Governance Guard and audit trail can inspect and verify every hop.  Inboxes
@@ -237,6 +240,28 @@ class ContinuationStore:
             self._db.execute("INSERT OR REPLACE INTO parked VALUES (?, ?)",
                              (agent, ctx.to_json()))
             self.parks += 1
+
+    def drop(self, agents) -> tuple[int, int]:
+        """Release every trace of ``agents`` that only a live agent needs.
+
+        Removes the hot context (and its charge against the budget), any
+        parked copy, and undelivered inbox messages.  ``history`` — the
+        trimmed transcript audit trail — is kept.  Returns
+        ``(hot_bytes_freed, inbox_messages_dropped)``.  Unknown agents are
+        a no-op, so calling it twice is harmless.
+        """
+        ids = [int(a) for a in agents]
+        freed = 0
+        for a in ids:
+            if self._hot.pop(a, None) is not None:
+                size = self._sizes.pop(a, 0)
+                self._hot_bytes -= size
+                freed += size
+        rows = [(a,) for a in ids]
+        self._db.executemany("DELETE FROM parked WHERE agent = ?", rows)
+        before = self._db.total_changes
+        self._db.executemany("DELETE FROM inbox WHERE recipient = ?", rows)
+        return freed, self._db.total_changes - before
 
     # ── Inboxes ──────────────────────────────────────────────────────
 

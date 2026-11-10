@@ -38,7 +38,16 @@ checked before every model step and by a watcher every ``poll_s``:
                 the level is lowered
   L4 TERMINATE  tools in flight are cancelled, queued/waiting agents ARCHIVED,
                 a reply that lands after the stop is discarded, and submit()
-                refuses new events
+                refuses new events.  Archived agents' hot transcripts, parked
+                copies and undelivered inboxes are freed (store.drop); their
+                cold history rows stay as the audit trail
+
+Per-agent boundaries (axlab.fabric.boundaries, opt-in with
+``boundaries=Boundaries(...)``): deterministic argument limits and policy on
+every TOOL line, approval holds, runtime revocation, a retry ceiling per
+failing tool, token budgets reserved before each model call, message caps,
+quarantine, and an HMAC-chained receipt per decision.  ``boundaries=None``
+(the default) leaves every behaviour above unchanged.
 
 On by default: with ``switch=None`` the runtime reads NXL_GOVERNANCE_FILE,
 else ./.nodexloop/governance.json (a missing file is NORMAL).  The check is
@@ -60,6 +69,14 @@ from axlab.fabric.agent_store import (
     AgentMessage,
     ContinuationStore,
     PendingTool,
+)
+from axlab.fabric.boundaries import (
+    ALLOW,
+    DENY,
+    HOLD,
+    Boundaries,
+    BoundaryState,
+    args_hash,
 )
 from axlab.fabric.slim_pool import AgentState, RoutedAgent, SlimAgentPool
 
@@ -90,6 +107,17 @@ class RuntimeStats:
     halted:         str = ""
     archived:       int = 0
     refused_events: int = 0
+    # Released by archiving: hot transcript bytes and undelivered messages.
+    archived_bytes_freed:    int = 0
+    archived_msgs_dropped:   int = 0
+    # Boundaries (all 0 when boundaries=None).
+    policy_denials:   int = 0     # refused by limits / policy / revocation / retry ceiling
+    retry_blocked:    int = 0     # of those: refused by the retry ceiling
+    holds:            int = 0     # over-limit calls sent to the approver
+    quarantined:      int = 0
+    budget_refusals:  int = 0     # model calls that never started: no budget left
+    budget_breaches:  int = 0     # backend reported more than the reserved bound
+    sends_refused:    int = 0
     # Wake → DORMANT wall time per task (includes queueing and tool waits).
     task_ms:        list[float] = field(default_factory=list)
     last_errors:    list[str] = field(default_factory=list)
@@ -148,6 +176,8 @@ class SlimFabricRuntime:
         timeout_s: float = 120.0,
         switch: "Optional[FleetSwitch] | bool" = None,
         scope: str = "default",
+        boundaries: Optional[Boundaries] = None,
+        ledger_path: Optional[str] = None,
     ) -> None:
         self.pool              = pool
         self.store             = store
@@ -168,6 +198,45 @@ class SlimFabricRuntime:
         self._held: list[int]  = []    # READY agents parked by an L3
         self._stopping         = False
         self._busy             = 0
+        self.bounds: Optional[BoundaryState] = (
+            BoundaryState(boundaries, ledger_path) if boundaries is not None else None)
+
+    # ── Boundaries ───────────────────────────────────────────────────
+
+    @property
+    def ledger(self):
+        return self.bounds.ledger if self.bounds is not None else None
+
+    def revoke(self, tool: str, *, template: Optional[str] = None,
+               agent: Optional[int] = None, by: str = "operator") -> None:
+        """Withdraw a tool from every agent, one template, or one agent.  Takes
+        effect at the next TOOL line; a call already running finishes.  There
+        is deliberately no un-revoke: widening is a new runtime."""
+        if self.bounds is None:
+            raise RuntimeError("revoke() needs boundaries=Boundaries(...)")
+        if agent is not None:
+            self.bounds.revoked_agent.add((int(agent), tool))
+        elif template is not None:
+            self.bounds.revoked_template.add((template, tool))
+        else:
+            self.bounds.revoked_tools.add(tool)
+        self.bounds.ledger.add("revoke", -1 if agent is None else agent, tool=tool,
+                               template=template, by=by)
+
+    def _quarantine(self, agent: int, reason: str) -> None:
+        """The agent stops here: no more model calls, tools, or messages either
+        way.  Its history stays as the audit trail."""
+        b = self.bounds
+        if agent in b.quarantined:
+            return
+        b.quarantined[agent] = reason
+        b.release(agent)
+        self.stats.quarantined += 1
+        b.ledger.add("quarantine", agent, reason=reason)
+        if self.pool.state(agent) != AgentState.ARCHIVED:
+            self.pool.set_state(agent, AgentState.ARCHIVED)
+            self._task_start.pop(agent, None)
+            self._release([agent])
 
     def _level(self) -> int:
         sw = self.switch
@@ -268,6 +337,7 @@ class SlimFabricRuntime:
                 self.pool.set_state(int(a), AgentState.ARCHIVED)
                 self._task_start.pop(int(a), None)
             self.stats.archived += len(doomed)
+            self._release(doomed)
             self._held.clear()
         elif self._tool_tasks:
             # L3: tools already running finish; their agents come back to the
@@ -276,6 +346,13 @@ class SlimFabricRuntime:
             self._drain_queue()
         self.stats.halted = LEVELS[lv]
         return self.stats
+
+    def _release(self, agents) -> None:
+        """An archived agent never runs again: free its transcript and
+        undelivered inbox now rather than holding them until restart."""
+        freed, dropped = self.store.drop(agents)
+        self.stats.archived_bytes_freed  += freed
+        self.stats.archived_msgs_dropped += dropped
 
     async def _worker(self, idx: int = 0) -> None:
         while True:
@@ -325,24 +402,56 @@ class SlimFabricRuntime:
             self.pool.set_state(agent, AgentState.DORMANT)
             return
 
+        b = self.bounds
+        if b is not None and agent in b.quarantined:
+            self.pool.set_state(agent, AgentState.ARCHIVED)
+            return
+
         inbox = self.store.take_inbox(agent)
         if inbox:
             ctx.text += ("\n" if ctx.text else "") + self._render_inbox(inbox)
 
         tags = self.pool.tags(agent)
         header = f"You are agent #{agent}" + (f" ({', '.join(tags)})" if tags else "")
-        result = await asyncio.to_thread(
-            self.backend.generate,
-            system            = self._system_prompt(agent),
-            prompt            = header + "\n\n" + ctx.text,
-            max_output_tokens = self.max_output_tokens,
-            timeout_s         = self.timeout_s,
-        )
+        system = self._system_prompt(agent)
+        prompt = header + "\n\n" + ctx.text
+        if b is not None:
+            bound = b.bound(system, prompt, self.max_output_tokens)
+            why = b.reserve(agent, bound)
+            if why is not None:
+                # The call never starts, so it cannot overrun anything.
+                self.stats.budget_refusals += 1
+                b.ledger.add("model_refused", agent, reason=why, bound=bound)
+                self.store.put(agent, ctx)
+                if why.startswith("agent budget"):
+                    self._quarantine(agent, why)
+                else:
+                    self.pool.set_state(agent, AgentState.DORMANT)
+                    self._task_start.pop(agent, None)
+                return
+        try:
+            result = await asyncio.to_thread(
+                self.backend.generate,
+                system            = system,
+                prompt            = prompt,
+                max_output_tokens = self.max_output_tokens,
+                timeout_s         = self.timeout_s,
+            )
+        except BaseException:
+            if b is not None:
+                b.release(agent)
+            raise
+        if b is not None:
+            actual = int(result.input_tokens) + int(result.output_tokens)
+            if not b.settle(agent, actual):
+                self.stats.budget_breaches += 1
+                b.ledger.add("budget_breach", agent, reserved=bound, actual=actual)
         if self._level() >= TERMINATE:
             # The stop landed while the model was generating: drop the reply.
             self.pool.set_state(agent, AgentState.ARCHIVED)
             self._task_start.pop(agent, None)
             self.stats.archived += 1
+            self._release([agent])
             return
         self.stats.steps         += 1
         self.stats.input_tokens  += result.input_tokens
@@ -383,6 +492,13 @@ class SlimFabricRuntime:
                 or self.pool.state(recipient) == AgentState.ARCHIVED):
             ctx.text += f"\n[system] SEND to #{recipient} refused: no such agent"
             return
+        if self.bounds is not None:
+            why = self.bounds.send_refusal(sender, recipient)
+            if why is not None:
+                self.stats.sends_refused += 1
+                self.bounds.ledger.add("send_refused", sender, recipient=recipient, reason=why)
+                ctx.text += f"\n[system] SEND to #{recipient} refused: {why}"
+                return
         self.store.post(AgentMessage.signed(sender, recipient, body))
         self.stats.messages += 1
         self.wake(recipient)
@@ -392,11 +508,27 @@ class SlimFabricRuntime:
     def _start_tool(self, agent: int, ctx, name: str, args: dict) -> None:
         template = self.pool.template_of(agent)
         fn = self.tools.get(name)
+        b = self.bounds
+        verdict, why = ALLOW, ""
         if fn is None or name not in template.tool_permissions:
             self.stats.tool_refusals += 1
+            verdict = DENY
             why = "unknown tool" if fn is None else "not permitted for this agent"
+        elif b is not None:
+            verdict, why = b.decide(agent, template.name, name, args)
+            if verdict == DENY:
+                self.stats.policy_denials += 1
+                if why.startswith("retry ceiling"):
+                    self.stats.retry_blocked += 1
+        if b is not None:
+            b.ledger.add("tool_decision", agent, tool=name, args=args_hash(args),
+                         verdict=verdict, reason=why)
+        if verdict == DENY:
             ctx.text += f"\n[system] TOOL {name} refused: {why}"
             self.store.put(agent, ctx)
+            if b is not None and b.denied(agent):
+                self._quarantine(agent, f"{b.denials[agent]} refused tool calls")
+                return
             self.pool.set_state(agent, AgentState.READY)
             self._queue.put_nowait(agent)
             return
@@ -406,12 +538,45 @@ class SlimFabricRuntime:
         self.store.put(agent, ctx)
         self.pool.set_state(agent, AgentState.WAITING_TOOL)
         self.stats.tool_calls += 1
-        task = asyncio.create_task(self._run_tool(agent, call_id, fn, args))
+        if verdict == HOLD:
+            self.stats.holds += 1
+            task = asyncio.create_task(self._held_tool(agent, call_id, name, fn, args, why))
+        else:
+            task = asyncio.create_task(self._run_tool(agent, call_id, fn, args))
         self._tool_tasks.add(task)
         task.add_done_callback(self._tool_tasks.discard)
 
+    async def _held_tool(self, agent: int, call_id: str, name: str, fn: ToolFn,
+                         args: dict, why: str) -> None:
+        """Over a limit with an approver configured: the approver decides.  No
+        answer within approver_timeout_s is a refusal."""
+        b = self.bounds
+        try:
+            ok = b.b.approver(agent, name, args, why)
+            if inspect.isawaitable(ok):
+                ok = await asyncio.wait_for(ok, b.b.approver_timeout_s)
+            ok = ok is True
+        except asyncio.TimeoutError:
+            ok, why = False, why + "; no decision in time"
+        except Exception as exc:          # a broken approver approves nothing
+            ok, why = False, f"{why}; approver failed: {type(exc).__name__}"
+        b.ledger.add("hold_decided", agent, tool=name, approved=ok, reason=why)
+        if ok:
+            return await self._run_tool(agent, call_id, fn, args)
+        self.stats.policy_denials += 1
+        ctx = self.store.get(agent)
+        ctx.pending = None
+        ctx.text += f"\n[system] TOOL {name} refused: {why} (held, not approved)"
+        self.store.put(agent, ctx)
+        if b.denied(agent):
+            self._quarantine(agent, f"{b.denials[agent]} refused tool calls")
+            return
+        self.pool.set_state(agent, AgentState.READY)
+        self._queue.put_nowait(agent)
+
     async def _run_tool(self, agent: int, call_id: str, fn: ToolFn,
                         args: dict) -> None:
+        ok = True
         try:
             if inspect.iscoroutinefunction(fn):
                 out = await fn(args)
@@ -423,7 +588,14 @@ class SlimFabricRuntime:
         except Exception as exc:
             self._record_error(agent, exc)
             line = f"\n[tool {call_id}] error: {type(exc).__name__}: {exc}"
+            ok = False
         ctx = self.store.get(agent)
+        if self.bounds is not None:
+            name = ctx.pending.tool if ctx.pending is not None else "?"
+            self.bounds.tool_result(agent, name, ok)
+            self.bounds.ledger.add("tool_result", agent, tool=name, call_id=call_id, ok=ok)
+            if agent in self.bounds.quarantined:
+                return
         ctx.pending = None
         ctx.text += line
         self.store.put(agent, ctx)

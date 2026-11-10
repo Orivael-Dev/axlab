@@ -6,8 +6,8 @@ AxLab is the public experiment lab for Orivael's AXIOM agent infrastructure.
 Each research track is an experiment you can run on your own machine, with
 the code it measures, its raw results, and the limits of what it shows.
 
-> **Status: v0.1 pre-release.** Two tracks run from this repo today: Slim
-> Agent Fabric and Fleet Kill Switch. The 75k-agent Jetson and Android
+> **Status: v0.1 pre-release.** Three tracks run from this repo today: Slim
+> Agent Fabric, Fleet Kill Switch and Bounded Failure Under Agent Escalation. The 75k-agent Jetson and Android
 > numbers below are reference results from Orivael's own runs. Their raw
 > logs are not published yet, so treat them as claims to reproduce, not as
 > verified facts. See [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md).
@@ -21,7 +21,7 @@ service.
 git clone https://github.com/Orivael-Dev/axlab && cd axlab
 python -m venv .venv && . .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -e ".[test]"
-pytest                                             # 66 tests, ~10 seconds
+pytest                                             # 85 tests, ~10 seconds
 
 # 1,000 agents with a scripted model (no model calls, no network)
 python experiments/slim_fabric/bench.py --agents 1000 --templates 10 --live 50 --backend fake
@@ -45,6 +45,7 @@ only talks to the Ollama URL you give it (default `http://localhost:11434`).
 |---|---|---|
 | [Slim Agent Fabric](experiments/slim_fabric/) | How many live agents fit in a small memory budget, and what does routing an event cost? | Yes |
 | [Fleet Kill Switch](experiments/fleet_kill_switch/) | What does an L1–L4 stop cost, how fast does it reach every agent, and how many tokens does it save? | Yes, except `runnode` (needs the AXIOM loop runner) |
+| [Bounded Failure Under Agent Escalation](experiments/bounded_failure/) | When 1,000 agents fail, loop, get prompt-injected or probe permissions, does each failure stay inside its boundaries: no unauthorized side effects, no retries past the ceiling, no budget overruns, no spread to healthy agents? | Yes |
 | AXIOM Pocket (Android) | Local inference on a phone: load time, decode speed, heat | Not yet: reference numbers only |
 
 To add a new track, see [docs/ADDING_RESEARCH.md](docs/ADDING_RESEARCH.md).

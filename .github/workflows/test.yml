@@ -29,6 +29,8 @@ jobs:
         run: python tools/check_reference_results.py
       - name: 1k-agent scripted run (no network)
         run: python experiments/slim_fabric/bench.py --agents 1000 --templates 10 --live 50 --backend fake --out bench-1k.json
+      - name: Bounded failure, 200 agents (no model; fails if the bounded arm leaks)
+        run: python experiments/bounded_failure/bench.py --quick --results-dir results/local
       - name: Fleet kill switch smoke (no model)
         shell: bash
         run: |

@@ -5,6 +5,7 @@ a few model slots, one shared model.
   embedding_board  EmbeddingBoard, hashed_embed, OllamaEmbedder
   agent_store      ContinuationStore, AgentMessage (suspended state, inboxes)
   runtime          SlimFabricRuntime (model slots, tools, fleet kill switch)
+  boundaries       Boundaries, BoundaryLedger (per-agent limits, budgets, receipts)
   backends         BackendResult, OllamaBackend
 
 Import the submodule you need; this package imports nothing on its own.
